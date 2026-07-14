@@ -204,7 +204,9 @@
     <h1>September 4th - 6th River Trip RSVP & Menu</h1>
     <p class="subtitle">Please fill out your details and make your selections below. I will share the reservations with the outfitters on a daily basis, at which point you will be able to reach out and finalize the reservation over email or phone. Outfitters: <a href="https://shenandoah-river.com" target="_blank" rel="noopener">https://shenandoah-river.com</a></p>
 
-    <!--Description -->
+    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbzMWhlKcCo96arOoeb230a2qj68fwxOuOvr9Rjzp5BMNgzXC_Ahg5cRtejW-O86q0rC6g/exec" method="POST">
+
+  <!--Description -->
 
 <h2>🏕️ Camping Trip Details (will expand as I answer questions)</h2>
 <h3>Friday, September 4</h3>
@@ -234,9 +236,6 @@
 
 <h3>We depart on Sunday the 6th, before 12PM and head over to our traditional BBQ spot.</h3>    
 </ul>
-    
-    <!-- KEEPING YOUR WEB APP URL (DO NOT CHANGE UNLESS REDEPLOYED) -->
-    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbyhMTB44DXesltcxey90eUXAsjgmfNQXHnOoBiDJ9XQ7GMZNPl-nH3W-Gz3tPnPa3pP/exec" method="POST">
         
         <!-- Attendance Info -->
         <fieldset>
@@ -349,6 +348,16 @@
                     <option value="Day Trip Only">No lodging (Day trip only)</option>
                 </select>
             </div>
+
+            <!-- DYNAMIC NIGHTS SELECTION -->
+            <div id="nightsSection" style="display: none; background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px;">
+                <label for="nightsCount" style="font-weight: bold;">📅 How many nights are you staying?</label>
+                <select id="nightsCount" name="nightsCount">
+                    <option value="" disabled selected>-- Select nights --</option>
+                    <option value="1">1 Night</option>
+                    <option value="2">2 Nights</option>
+                </select>
+            </div>
         </fieldset>
 
         <!-- Food / Catering Selections -->
@@ -360,7 +369,7 @@
                     <span>Riverside Skillet Lunch</span>
                     <span>$16.00 / person</span>
                 </div>
-                <p class="menu-desc">Famous saw-blade skillet cooked burgers & onions served right at a river landing.</p>
+                <p class="menu-desc">Famous saw-blade skillet cooked burgers & onions served right at a river landing. Inquire about special rates for children under 13 yo when you call.</p>
                 <label for="lunchCount">How many lunches do you need?</label>
                 <input type="number" id="lunchCount" name="lunchCount" class="meal-counter" min="0" value="0">
             </div>
@@ -370,7 +379,7 @@
                     <span>Saturday Pavilion Steak Dinner</span>
                     <span>$28.00 / person</span>
                 </div>
-                <p class="menu-desc">Freshly grilled steaks cooked at the main pavilion. Includes sides.</p>
+                <p class="menu-desc">Freshly grilled steaks cooked at the main pavilion. Includes sides. Inquire about special rates for children under 13 yo when you call.</p>
                 <label for="dinnerCount">How many steak dinners do you need?</label>
                 <input type="number" id="dinnerCount" name="dinnerCount" class="meal-counter" min="0" value="0">
             </div>
@@ -408,6 +417,11 @@
     const totalAdultsInput = document.getElementById('totalAdults');
     const totalChildrenInput = document.getElementById('totalChildren');
 
+    // Nights Elements
+    const lodgingInput = document.getElementById('lodging');
+    const nightsSection = document.getElementById('nightsSection');
+    const nightsCountInput = document.getElementById('nightsCount');
+
     // Child Meal Logic Elements
     const childMealSection = document.getElementById('childMealSection');
     const mealCounters = document.querySelectorAll('.meal-counter');
@@ -435,6 +449,19 @@
             warningBox.style.display = "block";
         } else {
             warningBox.style.display = "none";
+        }
+    }
+
+    function toggleNightsView() {
+        const lodgingValue = lodgingInput.value;
+        // If lodging is chosen and it's NOT "Day Trip Only"
+        if (lodgingValue && lodgingValue !== "Day Trip Only") {
+            nightsSection.style.display = "block";
+            nightsCountInput.required = true;
+        } else {
+            nightsSection.style.display = "none";
+            nightsCountInput.required = false;
+            nightsCountInput.value = ""; // Reset value if hidden
         }
     }
 
@@ -476,6 +503,8 @@
     totalAdultsInput.addEventListener('input', validateWatercraftCapacity);
     totalChildrenInput.addEventListener('input', validateWatercraftCapacity);
 
+    lodgingInput.addEventListener('change', toggleNightsView);
+
     mealCounters.forEach(input => input.addEventListener('input', toggleChildMealView));
     childLunchInput.addEventListener('input', validateMealCounts);
     childDinnerInput.addEventListener('input', validateMealCounts);
@@ -501,6 +530,7 @@
             form.reset();
             warningBox.style.display = "none";
             childMealSection.style.display = "none";
+            nightsSection.style.display = "none";
         })
         .catch(error => {
             statusMessage.style.display = "block";
