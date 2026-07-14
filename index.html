@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sept 4-6 Group Trip RSVP & Menu Selection</title>
+    <title>September 4th - 6th Group Trip RSVP & Menu Selection</title>
     <style>
         :root {
             --primary: #2c5282;
@@ -204,8 +204,8 @@
     <h1>September 4th - 6th River Trip RSVP & Menu</h1>
     <p class="subtitle">Please fill out your details and make your selections below. I will share the reservations with the outfitters on a daily basis, at which point you will be able to reach out and finalize the reservation over email or phone. Outfitters: <a href="https://shenandoah-river.com" target="_blank" rel="noopener">https://shenandoah-river.com</a></p>
 
-    <!-- REPLACE VALUE WITH YOUR ACTUAL DEPLOYED SCRIPT URL -->
-    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbw6gxEmX9In_8dQ5Wgx8BFWoOD1KCoc9y53ldK9SSgD8vKLN7YyKkTEc5aS3OApukCm/exec" method="POST">
+    <!-- KEEPING YOUR WEB APP URL (DO NOT CHANGE UNLESS REDEPLOYED) -->
+    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbyhMTB44DXesltcxey90eUXAsjgmfNQXHnOoBiDJ9XQ7GMZNPl-nH3W-Gz3tPnPa3pP/exec" method="POST">
         
         <!-- Attendance Info -->
         <fieldset>
@@ -329,9 +329,9 @@
                     <span>Riverside Skillet Lunch</span>
                     <span>$16.00 / person</span>
                 </div>
-                <p class="menu-desc">Famous saw-blade skillet cooked burgers & onions served right at a river landing. Inquire about secial rates for children under 13 yo when you call.</p>
+                <p class="menu-desc">Famous saw-blade skillet cooked burgers & onions served right at a river landing. Inquire about special rates for children under 13 yo when you call.</p>
                 <label for="lunchCount">How many lunches do you need?</label>
-                <input type="number" id="lunchCount" name="lunchCount" min="0" value="0">
+                <input type="number" id="lunchCount" name="lunchCount" class="meal-counter" min="0" value="0">
             </div>
 
             <div class="menu-option">
@@ -339,9 +339,27 @@
                     <span>Saturday Pavilion Steak Dinner</span>
                     <span>$28.00 / person</span>
                 </div>
-                <p class="menu-desc">Freshly grilled steaks cooked at the main pavilion. Includes sides. Inquire about secial rates for children under 13 yo when you call</p>
+                <p class="menu-desc">Freshly grilled steaks cooked at the main pavilion. Includes sides. Inquire about special rates for children under 13 yo when you call.</p>
                 <label for="dinnerCount">How many steak dinners do you need?</label>
-                <input type="number" id="dinnerCount" name="dinnerCount" min="0" value="0">
+                <input type="number" id="dinnerCount" name="dinnerCount" class="meal-counter" min="0" value="0">
+            </div>
+
+            <!-- DYNAMIC CHILD MEAL BREAKDOWN -->
+            <div id="childMealSection" style="display: none; background: #ebf8ff; padding: 15px; border-radius: 8px; border: 1px dashed #2b6cb0; margin-top: 15px;">
+                <label style="font-weight: bold; color: #2c5282; margin-bottom: 10px;">🧒 Child Meal Breakdown</label>
+                <p style="font-size: 0.85rem; color: #4a5568; margin: 0 0 12px 0;">Outfitters offer discounted pricing or custom bundles for kids. Please specify how many of your total selected meals are for children under 13:</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="childLunchCount">Of those, how many are child lunches?</label>
+                        <input type="number" id="childLunchCount" name="childLunchCount" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="childDinnerCount">Of those, how many are child dinners?</label>
+                        <input type="number" id="childDinnerCount" name="childDinnerCount" min="0" value="0">
+                    </div>
+                </div>
+                <div id="mealWarning" class="warning-box" style="margin-top: 10px;"></div>
             </div>
         </fieldset>
 
@@ -358,6 +376,15 @@
     const warningBox = document.getElementById('watercraftWarning');
     const totalAdultsInput = document.getElementById('totalAdults');
     const totalChildrenInput = document.getElementById('totalChildren');
+
+    // Child Meal Logic Elements
+    const childMealSection = document.getElementById('childMealSection');
+    const mealCounters = document.querySelectorAll('.meal-counter');
+    const lunchInput = document.getElementById('lunchCount');
+    const dinnerInput = document.getElementById('dinnerCount');
+    const childLunchInput = document.getElementById('childLunchCount');
+    const childDinnerInput = document.getElementById('childDinnerCount');
+    const mealWarning = document.getElementById('mealWarning');
 
     function validateWatercraftCapacity() {
         const adults = parseInt(totalAdultsInput.value || 0);
@@ -380,11 +407,47 @@
         }
     }
 
+    function toggleChildMealView() {
+        const totalLunches = parseInt(lunchInput.value || 0);
+        const totalDinners = parseInt(dinnerInput.value || 0);
+
+        if (totalLunches > 0 || totalDinners > 0) {
+            childMealSection.style.display = "block";
+        } else {
+            childMealSection.style.display = "none";
+            childLunchInput.value = 0;
+            childDinnerInput.value = 0;
+            mealWarning.style.display = "none";
+        }
+        validateMealCounts();
+    }
+
+    function validateMealCounts() {
+        const totalLunches = parseInt(lunchInput.value || 0);
+        const totalDinners = parseInt(dinnerInput.value || 0);
+        const childLunches = parseInt(childLunchInput.value || 0);
+        const childDinners = parseInt(childDinnerInput.value || 0);
+
+        if (childLunches > totalLunches || childDinners > totalDinners) {
+            mealWarning.textContent = "⚠️ Error: Children's meals cannot exceed the total number of meals requested.";
+            mealWarning.style.display = "block";
+            submitBtn.disabled = true;
+        } else {
+            mealWarning.style.display = "none";
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Attach Event Listeners
     document.querySelectorAll('.watercraft-qty').forEach(input => {
         input.addEventListener('input', validateWatercraftCapacity);
     });
     totalAdultsInput.addEventListener('input', validateWatercraftCapacity);
     totalChildrenInput.addEventListener('input', validateWatercraftCapacity);
+
+    mealCounters.forEach(input => input.addEventListener('input', toggleChildMealView));
+    childLunchInput.addEventListener('input', validateMealCounts);
+    childDinnerInput.addEventListener('input', validateMealCounts);
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -406,6 +469,7 @@
             submitBtn.innerText = "Submit Selections";
             form.reset();
             warningBox.style.display = "none";
+            childMealSection.style.display = "none";
         })
         .catch(error => {
             statusMessage.style.display = "block";
