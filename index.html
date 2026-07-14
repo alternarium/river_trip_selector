@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Trip RSVP & Menu Selection</title>
+    <style>
+        :root {
+            --primary: #2c5282;
+            --primary-light: #ebf8ff;
+            --secondary: #2b6cb0;
+            --text: #2d3748;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        legend {
+            font-weight: bold;
+            color: var(--primary);
+            padding: 0 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        .menu-option {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .menu-title {
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .menu-desc {
+            font-size: 0.88rem;
+            color: #4a5568;
+            margin: 4px 0 10px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        #statusMessage {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .success {
+            background-color: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .error {
+            background-color: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>River Trip RSVP & Menu</h1>
+    <p class="subtitle">Please fill out your details and make your selections below.</p>
+
+    <!-- REPLACE 'YOUR_WEB_APP_URL' with your deployed Google Apps Script URL -->
+    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbyOsdjQ0DP1JgncLlTfJNZPYozxA6XIf1XFa7h7_A2KjD08XSGd6ONoPWuC7aIspvr9/exec" method="POST">
+        
+        <!-- Attendance Info -->
+        <fieldset>
+            <legend>Your Information</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="totalAdults">Adults & Kids (13+)</label>
+                    <input type="number" id="totalAdults" name="totalAdults" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="totalChildren">Children (Under 13)</label>
+                    <input type="number" id="totalChildren" name="totalChildren" min="0" value="0" required>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Preference Selections -->
+        <fieldset>
+            <legend>Activity & Lodging Menu</legend>
+            
+            <div class="form-group">
+                <label for="waterActivity">Water Craft / Activity Choice</label>
+                <select id="waterActivity" name="waterActivity" required>
+                    <option value="" disabled selected>-- Select an option --</option>
+                    <option value="Canoe">Canoeing (~$50-$65 per craft)</option>
+                    <option value="Single Kayak">Single Kayaking (~$40-$55)</option>
+                    <option value="Tandem Kayak">Tandem Kayaking (~$60-$75)</option>
+                    <option value="Raft">Rafting (~$130-$180)</option>
+                    <option value="Tubing">River Tubing (~$25-$35)</option>
+                    <option value="None">Staying on dry land</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="lodging">Overnight Preference</label>
+                <select id="lodging" name="lodging" required>
+                    <option value="" disabled selected>-- Select an option --</option>
+                    <option value="Camp Outback (Tent)">Camp Outback - Tent Camping (~$12-$15/night)</option>
+                    <option value="Cabin">Riverfront Cabin Rental (Real beds/Hot tub)</option>
+                    <option value="Day Trip Only">No lodging (Day trip only)</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <!-- Food / Catering Selections -->
+        <fieldset>
+            <legend>Catered Add-ons</legend>
+            
+            <div class="menu-option">
+                <div class="menu-title">
+                    <span>Riverside Skillet Lunch</span>
+                    <span>$16.00 / person</span>
+                </div>
+                <p class="menu-desc">Famous saw-blade skillet cooked burgers & onions served right at a river landing.</p>
+                <label for="lunchCount">How many lunches do you need?</label>
+                <input type="number" id="lunchCount" name="lunchCount" min="0" value="0">
+            </div>
+
+            <div class="menu-option">
+                <div class="menu-title">
+                    <span>Saturday Pavilion Steak Dinner</span>
+                    <span>$28.00 / person</span>
+                </div>
+                <p class="menu-desc">Freshly grilled steaks cooked at the main pavilion. Includes sides.</p>
+                <label for="dinnerCount">How many steak dinners do you need?</label>
+                <input type="number" id="dinnerCount" name="dinnerCount" min="0" value="0">
+            </div>
+        </fieldset>
+
+        <button type="submit" id="submitBtn">Submit Selections</button>
+    </form>
+
+    <div id="statusMessage"></div>
+</div>
+
+<script>
+    const form = document.getElementById('rsvpForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMessage = document.getElementById('statusMessage');
+
+    form.addEventListener('submit', function(e) {
+        // Stop default browser jump behavior
+        e.preventDefault();
+        
+        // Basic fallback visual indicator
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving Selections...";
+        statusMessage.style.display = "none";
+
+        // Collect the form data natively
+        const formData = new FormData(form);
+
+        // Submit via AJAX asynchronous request to prevent page reloading
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            statusMessage.style.display = "block";
+            statusMessage.className = "success";
+            statusMessage.innerText = "Success! Your choices have been saved directly to the master spreadsheet.";
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit Selections";
+            form.reset();
+        })
+        .catch(error => {
+            statusMessage.style.display = "block";
+            statusMessage.className = "error";
+            statusMessage.innerText = "Oops! Something went wrong saving your choices. Please try again.";
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit Selections";
+            console.error('Error:', error);
+        });
+    });
+</script>
+
+</body>
+</html>
