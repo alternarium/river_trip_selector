@@ -116,6 +116,47 @@
             margin: 4px 0 10px 0;
         }
 
+        .watercraft-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .watercraft-info {
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .watercraft-name {
+            font-weight: 600;
+        }
+
+        .watercraft-price {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .watercraft-input-wrapper {
+            width: 90px;
+        }
+
+        .warning-box {
+            background-color: #fffaf0;
+            color: #dd6b20;
+            border: 1px solid #fbd38d;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+            font-weight: 500;
+        }
+
         button {
             width: 100%;
             padding: 14px;
@@ -162,7 +203,7 @@
     <p class="subtitle">Please fill out your details and make your selections below.</p>
 
     <!-- REPLACE 'YOUR_WEB_APP_URL' with your deployed Google Apps Script URL -->
-    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbyOsdjQ0DP1JgncLlTfJNZPYozxA6XIf1XFa7h7_A2KjD08XSGd6ONoPWuC7aIspvr9/exec" method="POST">
+    <form id="rsvpForm" action="YOUR_WEB_APP_URL" method="POST">
         
         <!-- Attendance Info -->
         <fieldset>
@@ -194,17 +235,67 @@
         <fieldset>
             <legend>Activity & Lodging Menu</legend>
             
+            <!-- Water Craft Selection Cart -->
             <div class="form-group">
-                <label for="waterActivity">Water Craft / Activity Choice</label>
-                <select id="waterActivity" name="waterActivity" required>
-                    <option value="" disabled selected>-- Select an option --</option>
-                    <option value="Canoe">Canoeing (~$50-$65 per craft)</option>
-                    <option value="Single Kayak">Single Kayaking (~$40-$55)</option>
-                    <option value="Tandem Kayak">Tandem Kayaking (~$60-$75)</option>
-                    <option value="Raft">Rafting (~$130-$180)</option>
-                    <option value="Tubing">River Tubing (~$25-$35)</option>
-                    <option value="None">Staying on dry land</option>
-                </select>
+                <label class="form-label" style="margin-bottom: 12px; font-weight: bold;">Select Watercraft Quantities</label>
+                
+                <!-- Single Kayak -->
+                <div class="watercraft-item">
+                    <div class="watercraft-info">
+                        <div class="watercraft-name">Single Kayaking</div>
+                        <div class="watercraft-price">~$40-$55 per person</div>
+                    </div>
+                    <div class="watercraft-input-wrapper">
+                        <input type="number" id="qtySingleKayak" name="qtySingleKayak" class="watercraft-qty" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- Canoe -->
+                <div class="watercraft-item">
+                    <div class="watercraft-info">
+                        <div class="watercraft-name">Canoeing</div>
+                        <div class="watercraft-price">Fits 2 people + kids (~$50-$65 per craft)</div>
+                    </div>
+                    <div class="watercraft-input-wrapper">
+                        <input type="number" id="qtyCanoe" name="qtyCanoe" class="watercraft-qty" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- Tandem Kayak -->
+                <div class="watercraft-item">
+                    <div class="watercraft-info">
+                        <div class="watercraft-name">Tandem Kayaking</div>
+                        <div class="watercraft-price">Fits 2 people (~$60-$75 per craft)</div>
+                    </div>
+                    <div class="watercraft-input-wrapper">
+                        <input type="number" id="qtyTandemKayak" name="qtyTandemKayak" class="watercraft-qty" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- Rafting -->
+                <div class="watercraft-item">
+                    <div class="watercraft-info">
+                        <div class="watercraft-name">Rafting</div>
+                        <div class="watercraft-price">~$130-$180 per raft</div>
+                    </div>
+                    <div class="watercraft-input-wrapper">
+                        <input type="number" id="qtyRaft" name="qtyRaft" class="watercraft-qty" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- Tubing -->
+                <div class="watercraft-item">
+                    <div class="watercraft-info">
+                        <div class="watercraft-name">River Tubing</div>
+                        <div class="watercraft-price">~$25-$35 per person</div>
+                    </div>
+                    <div class="watercraft-input-wrapper">
+                        <input type="number" id="qtyTubing" name="qtyTubing" class="watercraft-qty" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- Capacity Alert System -->
+                <div id="watercraftWarning" class="warning-box"></div>
             </div>
 
             <div class="form-group">
@@ -253,20 +344,49 @@
     const form = document.getElementById('rsvpForm');
     const submitBtn = document.getElementById('submitBtn');
     const statusMessage = document.getElementById('statusMessage');
+    const warningBox = document.getElementById('watercraftWarning');
+
+    const totalAdultsInput = document.getElementById('totalAdults');
+    const totalChildrenInput = document.getElementById('totalChildren');
+
+    function validateWatercraftCapacity() {
+        const adults = parseInt(totalAdultsInput.value || 0);
+        const children = parseInt(totalChildrenInput.value || 0);
+        const totalParticipants = adults + children;
+
+        const singleKayak = parseInt(document.getElementById('qtySingleKayak').value || 0);
+        const canoe = parseInt(document.getElementById('qtyCanoe').value || 0);
+        const tandem = parseInt(document.getElementById('qtyTandemKayak').value || 0);
+        const raft = parseInt(document.getElementById('qtyRaft').value || 0);
+        const tubing = parseInt(document.getElementById('qtyTubing').value || 0);
+
+        // Calculate approximate spots filled
+        const totalSeatsSelected = singleKayak + tubing + (canoe * 2) + (tandem * 2) + (raft * 4);
+
+        if (totalSeatsSelected > totalParticipants) {
+            warningBox.textContent = `⚠️ Note: You have reserved equipment spots for up to ${totalSeatsSelected} people, but only have ${totalParticipants} total participants listed.`;
+            warningBox.style.display = "block";
+        } else {
+            warningBox.style.display = "none";
+        }
+    }
+
+    // Attach listeners to update real-time alerts upon value changes
+    document.querySelectorAll('.watercraft-qty').forEach(input => {
+        input.addEventListener('input', validateWatercraftCapacity);
+    });
+    totalAdultsInput.addEventListener('input', validateWatercraftCapacity);
+    totalChildrenInput.addEventListener('input', validateWatercraftCapacity);
 
     form.addEventListener('submit', function(e) {
-        // Stop default browser jump behavior
         e.preventDefault();
         
-        // Basic fallback visual indicator
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving Selections...";
         statusMessage.style.display = "none";
 
-        // Collect the form data natively
         const formData = new FormData(form);
 
-        // Submit via AJAX asynchronous request to prevent page reloading
         fetch(form.action, {
             method: 'POST',
             body: formData
@@ -278,6 +398,7 @@
             submitBtn.disabled = false;
             submitBtn.innerText = "Submit Selections";
             form.reset();
+            warningBox.style.display = "none";
         })
         .catch(error => {
             statusMessage.style.display = "block";
