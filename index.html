@@ -80,6 +80,8 @@
         }
 
         input[type="text"],
+        input[type="email"],
+        input[type="tel"],
         input[type="number"],
         select {
             width: 100%;
@@ -202,8 +204,8 @@
     <h1>River Trip RSVP & Menu</h1>
     <p class="subtitle">Please fill out your details and make your selections below. If you have any questions, please reach out on WhatsApp @301-326-6135.</p>
 
-    <!-- REPLACE 'YOUR_WEB_APP_URL' with your deployed Google Apps Script URL -->
-    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbwsppsMdNrgJMrmk5-Vw_0ua5OcnUokpoNDkuPGtBq_-ZbNOyCpafShgO7Pc8dCBQR8/exec" method="POST">
+    <!-- REPLACE VALUE WITH YOUR ACTUAL DEPLOYED SCRIPT URL -->
+    <form id="rsvpForm" action="https://script.google.com/macros/s/AKfycbyIURkDkED-LsVufXmQIi9oFapqjmeDIGiIBcQ7ZPrjCcadh7JgrkSIKlYclQP25VFK/exec" method="POST">
         
         <!-- Attendance Info -->
         <fieldset>
@@ -216,6 +218,17 @@
                 <div class="form-group">
                     <label for="lastName">Last Name</label>
                     <input type="text" id="lastName" name="lastName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="userEmail">Email Address</label>
+                    <input type="email" id="userEmail" name="userEmail" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPhone">Phone Number</label>
+                    <input type="tel" id="userPhone" name="userPhone" placeholder="(555) 555-5555" required>
                 </div>
             </div>
             
@@ -235,7 +248,6 @@
         <fieldset>
             <legend>Activity & Lodging Menu</legend>
             
-            <!-- Water Craft Selection Cart -->
             <div class="form-group">
                 <label class="form-label" style="margin-bottom: 12px; font-weight: bold;">Select Watercraft Quantities</label>
                 
@@ -294,7 +306,6 @@
                     </div>
                 </div>
 
-                <!-- Capacity Alert System -->
                 <div id="watercraftWarning" class="warning-box"></div>
             </div>
 
@@ -345,7 +356,6 @@
     const submitBtn = document.getElementById('submitBtn');
     const statusMessage = document.getElementById('statusMessage');
     const warningBox = document.getElementById('watercraftWarning');
-
     const totalAdultsInput = document.getElementById('totalAdults');
     const totalChildrenInput = document.getElementById('totalChildren');
 
@@ -360,7 +370,6 @@
         const raft = parseInt(document.getElementById('qtyRaft').value || 0);
         const tubing = parseInt(document.getElementById('qtyTubing').value || 0);
 
-        // Calculate approximate spots filled
         const totalSeatsSelected = singleKayak + tubing + (canoe * 2) + (tandem * 2) + (raft * 4);
 
         if (totalSeatsSelected > totalParticipants) {
@@ -371,7 +380,6 @@
         }
     }
 
-    // Attach listeners to update real-time alerts upon value changes
     document.querySelectorAll('.watercraft-qty').forEach(input => {
         input.addEventListener('input', validateWatercraftCapacity);
     });
@@ -380,7 +388,6 @@
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving Selections...";
         statusMessage.style.display = "none";
